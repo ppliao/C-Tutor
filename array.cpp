@@ -15,11 +15,15 @@ int main() {
     for (int i = 0; i < 10; i++) {
         array[i] = rand() % 100 + 1;
     }
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 
 =======
 321
 >>>>>>> f54c36d (2)
+=======
+10
+>>>>>>> Stashed changes
     // 顯示原始陣列
     cout << "原始陣列: ";
     for (int i = 0; i < 10; i++) {
