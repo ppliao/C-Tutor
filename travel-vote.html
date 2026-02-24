@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>美食選擇題(可複選)</title>
+  <style>
+    :root {
+      --bg: #f7f2e8;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #4b5563;
+      --line: #e5e7eb;
+      --primary: #0f766e;
+      --primary-hover: #115e59;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top, #fff9ef 0%, var(--bg) 60%);
+    }
+
+    .wrap {
+      width: min(980px, 94%);
+      margin: 24px auto 42px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(30px, 4vw, 40px);
+    }
+
+    .desc {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: clamp(18px, 2.6vw, 22px);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .item {
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+      cursor: pointer;
+      display: block;
+    }
+
+    .item:has(input:checked) {
+      border-color: #0f766e;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+    }
+
+    .photo {
+      width: 100%;
+      height: 170px;
+      object-fit: cover;
+      background: #f3f4f6;
+      display: block;
+    }
+
+    .body {
+      padding: 12px;
+    }
+
+    .topline {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .topline input {
+      margin-top: 4px;
+      transform: scale(1.4);
+      flex: 0 0 auto;
+    }
+
+    .name {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.35;
+    }
+
+    .feature {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    .btn {
+      width: 100%;
+      margin-top: 16px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+      padding: 13px 16px;
+      font-size: 23px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .error {
+      color: #b91c1c;
+      min-height: 28px;
+      margin-top: 8px;
+      font-size: 18px;
+    }
+
+    .result {
+      display: none;
+      margin-top: 16px;
+      border: 1px solid #99f6e4;
+      border-radius: 12px;
+      background: #f0fdfa;
+      padding: 14px;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .result ul {
+      margin: 8px 0 8px 20px;
+      padding: 0;
+    }
+
+    .share-link {
+      word-break: break-all;
+      color: #0c4a6e;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="panel">
+      <h1>美食選擇題(可複選)</h1>
+      <p class="desc">請勾選你想吃的店家（可複選）。</p>
+      <div class="grid" id="optionsContainer"></div>
+
+      <button class="btn" id="submitBtn" type="button">送出並產生結果連結</button>
+      <div class="error" id="errorMsg"></div>
+      <div class="result" id="resultBox"></div>
+    </section>
+  </main>
+
+  <script>
+    const options = [
+      {
+        name: "すみれ 札幌本店（味噌拉麵天花板）",
+        feature: "味噌濃但不死鹹，蒜香重",
+        image: "images/sumire.webp"
+      },
+      {
+        name: "かに本家 札幌站前本店（帝王蟹首選）",
+        feature: "帝王蟹、毛蟹多種料理方式；蒸、烤、生食一次體驗",
+        image: "images/kani-honke.jpg"
+      },
+      {
+        name: "回転寿司 トリトン（CP值壽司王）",
+        feature: "干貝、鮭魚、甜蝦厚切；迴轉壽司價格，專門店品質",
+        image: "images/triton.jpg"
+      },
+      {
+        name: "成吉思汗 だるま 本店（烤羊肉名店）",
+        feature: "羊肉完全不腥；配北海道啤酒超爽",
+        image: "images/daruma-lamb.jpg"
+      },
+      {
+        name: "政寿司 本店（小樽壽司天花板）",
+        feature: "海膽、干貝、鮭魚卵新鮮到誇張；適合一生至少吃一次",
+        image: "images/masa-sushi.jpg"
+      },
+      {
+        name: "滝波食堂（爆量海鮮丼）",
+        feature: "鮭魚卵、干貝、海膽堆成山；拍照＋味覺雙滿足",
+        image: "images/takinami.jpg"
+      },
+      {
+        name: "えびそば一幻（蝦味拉麵）",
+        feature: "整碗蝦味但不腥；湯頭可選濃淡",
+        image: "images/ebisoba-ichigen.jpg"
+      },
+      {
+        name: "函太郎 新千歲空港店（機場高水準壽司）",
+        feature: "魚料新鮮厚切；不輸市區分店",
+        image: "images/kantaro.jpg"
+      },
+      {
+        name: "串鳥 本店（札幌居酒屋代表）",
+        feature: "雞肉、豬肉、蔬菜串樣樣穩；醬汁偏甜鹹，配啤酒超搭",
+        image: "images/kushidori.jpg"
+      },
+      {
+        name: "いただきコッコちゃん（年輕派人氣）",
+        feature: "烤串＋炸雞＋居酒屋菜一次滿足；口味偏重，適合多人",
+        image: "images/kokkochan.jpg"
+      },
+      {
+        name: "焼とり 鳥勢（小樽老店）",
+        feature: "傳統炭火烤串；醬香濃郁、價格實在",
+        image: "images/torisei.jpg"
+      }
+    ];
+
+    const optionsContainer = document.getElementById("optionsContainer");
+    const submitBtn = document.getElementById("submitBtn");
+    const errorMsg = document.getElementById("errorMsg");
+    const resultBox = document.getElementById("resultBox");
+
+    function filePathToUrl(path) {
+      if (!path) return "";
+      if (/^https?:\/\//i.test(path) || path.startsWith("file:///")) return path;
+      if (/^[A-Za-z]:\\/.test(path)) return "file:///" + path.replace(/\\/g, "/");
+      return path.replace(/\\/g, "/");
+    }
+
+    function getBaseUrl() {
+      return window.location.href.split("?")[0];
+    }
+
+    function renderOptions() {
+      optionsContainer.innerHTML = options
+        .map((item, index) => {
+          const imgSrc = filePathToUrl(item.image);
+          const fallback = `https://placehold.co/800x500?text=${encodeURIComponent(item.name)}`;
+          return `
+            <label class="item">
+              <img class="photo" src="${imgSrc}" alt="${item.name}" onerror="this.onerror=null;this.src='${fallback}'" />
+              <div class="body">
+                <div class="topline">
+                  <input type="checkbox" name="food" value="${index}" />
+                  <h2 class="name">${item.name}</h2>
+                </div>
+                <p class="feature">特色：${item.feature}</p>
+              </div>
+            </label>
+          `;
+        })
+        .join("");
+    }
+
+    function getSelectedIndexes() {
+      return [...document.querySelectorAll("input[name='food']:checked")].map((el) => Number(el.value));
+    }
+
+    function restoreSelected(indexes) {
+      indexes.forEach((idx) => {
+        const target = document.querySelector(`input[name='food'][value='${idx}']`);
+        if (target) target.checked = true;
+      });
+    }
+
+    function showResult(indexes, linkUrl) {
+      const listHtml = indexes.map((idx) => `<li>${options[idx].name}</li>`).join("");
+      resultBox.style.display = "block";
+      resultBox.innerHTML = `
+        <strong>已選擇：</strong>
+        <ul>${listHtml}</ul>
+        把這個連結傳給家人，點開就能看到同一份勾選結果：<br />
+        <a class="share-link" href="${linkUrl}">${linkUrl}</a>
+      `;
+    }
+
+    function readFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const picks = params.get("picks");
+      if (!picks) return;
+
+      const indexes = picks
+        .split(",")
+        .map((v) => Number(v))
+        .filter((n) => Number.isInteger(n) && n >= 0 && n < options.length);
+
+      if (indexes.length === 0) return;
+      restoreSelected(indexes);
+
+      const link = `${getBaseUrl()}?picks=${indexes.join(",")}`;
+      showResult(indexes, link);
+    }
+
+    submitBtn.addEventListener("click", () => {
+      errorMsg.textContent = "";
+      const selectedIndexes = getSelectedIndexes();
+      if (selectedIndexes.length === 0) {
+        errorMsg.textContent = "請至少勾選一個店家。";
+        return;
+      }
+
+      const picks = selectedIndexes.join(",");
+      const link = `${getBaseUrl()}?picks=${picks}`;
+      history.replaceState({}, "", link);
+      showResult(selectedIndexes, link);
+    });
+
+    renderOptions();
+    readFromQuery();
+  </script>
+</body>
+</html>

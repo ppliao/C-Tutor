@@ -15,6 +15,7 @@ int main() {
     for (int i = 0; i < 10; i++) {
         array[i] = rand() % 100 + 1;
     }
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 <<<<<<< HEAD
 
@@ -24,6 +25,9 @@ int main() {
 =======
 10
 >>>>>>> Stashed changes
+=======
+ 87878787 5454545454        444 
+>>>>>>> 172a77b (result)
     // 顯示原始陣列
     cout << "原始陣列: ";
     for (int i = 0; i < 10; i++) {
